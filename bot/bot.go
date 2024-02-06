@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/unsuman/discord-bot/config"
+	"github.com/unsuman/discord-bot/ollamaorcalite"
 )
 
 var (
@@ -25,6 +27,7 @@ func Start() {
 	goBot.AddHandler(messageCreate)
 
 	err = goBot.Open()
+	defer goBot.Close()
 	if err != nil {
 		fmt.Println("error opening connection,", err)
 		return
@@ -35,24 +38,26 @@ func Start() {
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
 
-	goBot.Close()
 	return
 }
 
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
-	// Ignore all messages created by the bot itself
-	// This isn't required in this specific example but it's a good practice.
-	if m.Author.ID == s.State.User.ID {
+	if m.Author.ID == s.State.User.ID || m.Content[0] != ';' {
 		return
 	}
-	// If the message is "ping" reply with "Pong!"
+
 	if m.Content == ";ping" {
-		s.ChannelMessageSend(m.ChannelID, "Pong!")
+		s.ChannelMessageSend(m.ChannelID, "Pong!w")
 	}
 
-	// If the message is "pong" reply with "Ping!"
 	if m.Content == ";pong" {
 		s.ChannelMessageSend(m.ChannelID, "Ping!")
+	}
+
+	if strings.HasPrefix(m.Content, ";orca") {
+		prompt := strings.SplitN(m.Content, ";orca", 2)
+		response := ollamaorcalite.ChatAI(prompt[1])
+		s.ChannelMessageSend(m.ChannelID, response)
 	}
 }
