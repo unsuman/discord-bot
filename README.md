@@ -4,7 +4,7 @@
 
 This is a small project that involves a Discord bot integrated with a locally running orca-mini -3B LLM using Ollama. The bot accepts responses via a built-in REST API.
 
-[]!(demo/demo.gif)
+![](demo/demo.gif)
 
 ## Prerequisites
 
